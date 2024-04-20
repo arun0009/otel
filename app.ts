@@ -27,7 +27,7 @@ app.get("/send", async (request: Request, response: Response) => {
   response.json(JSON.stringify(sqsResponse));
 });
 
-app.get("/recieve", async (request: Request, response: Response) => {
+app.get("/receive", async (request: Request, response: Response) => {
   const sqs = new SQSClient({});
 
   const receiveCommand = new ReceiveMessageCommand({
