@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    hostname: localstack
+    ports:
+      - "4566-4599:4566-4599" # Port range for LocalStack services
+    environment:
+      - SERVICES=sqs
+      - DEFAULT_REGION=us-east-1
+      - HOSTNAME_EXTERNAL=localhost
+    networks:
+      - otel-network
+    volumes:
+      - ./localstack:/etc/localstack/init/ready.d
+  
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    hostname: zipkin
+    ports:
+      - "9411:9411" # Zipkin UI port
+    networks:
+      - otel-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector
+    container_name: otel-collector
+    hostname: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "13133:13133" # health_check extension
+      - "4317:4317" # gRPC port
+      - "4318:4318" # HTTP port
+    depends_on:
+      - zipkin  
+    networks:
+      - otel-network
+
+  express-app:
+    build: .
+    container_name: express-app
+    hostname: express-app
+    ports:
+      - "5005:5005" 
+    depends_on:
+      - localstack
+      - otel-collector
+      - zipkin
+    environment:
+      - AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+      - AWS_REGION=us-east-1
+      - SQS_ENDPOINT=http://localstack:4566 # Point to LocalStack SQS endpoint
+    networks:
+      - otel-network      
+
+networks:
+  otel-network:
