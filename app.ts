@@ -32,6 +32,7 @@ app.get("/receive", async (request: Request, response: Response) => {
 
   const receiveCommand = new ReceiveMessageCommand({
     QueueUrl: "http://localstack:4566/000000000000/otel-queue",
+    MessageAttributeNames: ['All'],
     MaxNumberOfMessages: 1,
     VisibilityTimeout: 30,
   });
