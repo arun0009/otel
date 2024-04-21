@@ -43,23 +43,36 @@ services:
     networks:
       - otel-network
 
-  express-app:
+  echo:
+    image: hashicorp/http-echo
+    container_name: echo
+    hostname: echo
+    ports:
+      - "5678:5678"
+    command: ["-text=hello world"]         
+    networks:
+      - otel-network
+      
+  express:
     build: .
-    container_name: express-app
-    hostname: express-app
+    container_name: express
+    hostname: express
     ports:
       - "5005:5005" 
     depends_on:
       - localstack
       - otel-collector
       - jaeger
+      - echo
     environment:
       - AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
       - AWS_REGION=us-east-1
-      - SQS_ENDPOINT=http://localstack:4566 # Point to LocalStack SQS endpoint
+      - SQS_ENDPOINT=http://localstack:4566 # Point to LocalStack SQS endpoint    
     networks:
       - otel-network      
+
+   
 
 networks:
   otel-network:
