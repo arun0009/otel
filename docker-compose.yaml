@@ -16,12 +16,14 @@ services:
     volumes:
       - ./localstack:/etc/localstack/init/ready.d
   
-  zipkin:
-    image: openzipkin/zipkin
-    container_name: zipkin
-    hostname: zipkin
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger
+    hostname: jaeger
     ports:
-      - "9411:9411" # Zipkin UI port
+      - "16686:16686" # Jaeger UI port
+      - "14268"
+      - "14250"
     networks:
       - otel-network
 
@@ -37,7 +39,7 @@ services:
       - "4317:4317" # gRPC port
       - "4318:4318" # HTTP port
     depends_on:
-      - zipkin  
+      - jaeger  
     networks:
       - otel-network
 
@@ -50,7 +52,7 @@ services:
     depends_on:
       - localstack
       - otel-collector
-      - zipkin
+      - jaeger
     environment:
       - AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY

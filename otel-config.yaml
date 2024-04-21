@@ -7,8 +7,9 @@ receivers:
         endpoint: 0.0.0.0:4318      
 
 exporters:
-  zipkin:
-    endpoint: http://zipkin:9411/api/v2/spans
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls::insecure: true
 
 processors:
   batch:
@@ -18,4 +19,4 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [zipkin]
+      exporters: [otlp/jaeger] # Use OTLP exporter to Jaeger

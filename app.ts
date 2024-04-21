@@ -39,14 +39,14 @@ app.get("/receive", async (request: Request, response: Response) => {
 
   const sqsResponse = await sqs.send(receiveCommand);
   sqsResponse.Messages?.forEach((message) => async () => {
-    console.log(JSON.stringify(message.Body));
-    const deleteCommand = new DeleteMessageCommand({
-      QueueUrl: "http://localstack:4566/000000000000/otel-queue",
-      ReceiptHandle: message.ReceiptHandle,
+        console.log(JSON.stringify(message.Body));
+        const deleteCommand = new DeleteMessageCommand({
+            QueueUrl: "http://localstack:4566/000000000000/otel-queue",
+            ReceiptHandle: message.ReceiptHandle,
+        });
+        await sqs.send(deleteCommand);
     });
-    await sqs.send(deleteCommand);
-  });
-  response.json({message: `done`});
+    response.json({message: `done`});
 });
 
 app.get("/home", (request: Request, response: Response) => {
