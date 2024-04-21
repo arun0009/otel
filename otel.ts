@@ -3,8 +3,10 @@ import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { AwsInstrumentation } from "@opentelemetry/instrumentation-aws-sdk";
-import { trace, Span, context } from "@opentelemetry/api";
+import { Span } from "@opentelemetry/api";
 import { parseTraceParent } from "@opentelemetry/core";
+import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
+import { ExpressLayerType, ExpressInstrumentation } from "@opentelemetry/instrumentation-express";
 
 const exporter = new OTLPTraceExporter({
   url: "http://otel-collector:4318/v1/traces",
@@ -17,6 +19,8 @@ const sdk = new NodeSDK({
   spanProcessor: new BatchSpanProcessor(exporter),
   serviceName: "otel",
   instrumentations: [
+    new HttpInstrumentation(),
+    new ExpressInstrumentation({ ignoreLayersType: [ExpressLayerType.MIDDLEWARE] }),
     new AwsInstrumentation({
       sqsExtractContextPropagationFromPayload: true,
       suppressInternalInstrumentation: true,
